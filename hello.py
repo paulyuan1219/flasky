@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 from flask import Flask, render_template, session, redirect, url_for
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
@@ -11,6 +12,15 @@ from flask_mail import Mail, Message
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
+# Load environment variables from .env file
+load_dotenv()
+
+# Now you can safely access the environment variables
+mail_username = os.environ.get('MAIL_USERNAME')
+mail_password = os.environ.get('MAIL_PASSWORD')
+
+
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'hard to guess string'
 app.config['SQLALCHEMY_DATABASE_URI'] =\
@@ -19,11 +29,23 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_DEBUG'] = False
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 app.config['FLASKY_MAIL_SUBJECT_PREFIX'] = '[Flasky]'
 app.config['FLASKY_MAIL_SENDER'] = 'Flasky Admin <flasky@example.com>'
 app.config['FLASKY_ADMIN'] = os.environ.get('FLASKY_ADMIN')
+
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USERNAME'] = mail_username  # Use your actual Gmail address
+app.config['MAIL_PASSWORD'] = mail_password     # Use your generated App Password
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+
+
 
 bootstrap = Bootstrap(app)
 moment = Moment(app)
@@ -99,3 +121,30 @@ def index():
         return redirect(url_for('index'))
     return render_template('index.html', form=form, name=session.get('name'),
                            known=session.get('known', False))
+
+@app.route("/sendemail01")
+def sendemail01():
+    msg = Message(
+        subject="Hello",
+        sender="from@example.com",
+        recipients=["paulyuan1219canada@gmail.com"],
+    )
+    msg.body = "testing"
+    msg.html = "<b>testing</b>"
+    
+    mail.send(msg)
+
+
+@app.route("/sendemail02")
+def sendemail02():
+    msg = Message(
+        subject='Hello from the other side via sendemail02!', 
+        sender=mail_username, #'weiyuan1981@gmail.com',  # Ensure this matches MAIL_USERNAME
+        recipients=['paulyuan1219canada@gmail.com']  # Replace with actual recipient's email
+    )
+    msg.body = "Hey, sending you this email from my Flask app, let me know if it works. Last try is great"
+    mail.send(msg)
+    return "Message sent!"
+
+if __name__ == '__main__':
+    app.run(debug=True)
