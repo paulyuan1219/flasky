@@ -146,5 +146,16 @@ def sendemail02():
     mail.send(msg)
     return "Message sent!"
 
+@app.route("/send_email_test")
+def send_email_test():
+#    to = 'paulyuan1219canada@gmail.com'
+#    subject = "This is to test the send_email() functon"
+    user = { "username": "dianxiaoer" }
+    
+    if app.config['FLASKY_ADMIN']:
+        send_email(app.config['FLASKY_ADMIN'], 'New User', 'mail/new_user', user=user)    
+    return "Everything is fine!"
+
+
 if __name__ == '__main__':
     app.run(debug=True)
